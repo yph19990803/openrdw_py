@@ -1,0 +1,201 @@
+{
+  "project": {
+    "name": "OpenRdw_vbdi",
+    "unity_version": "2022.3.46f1",
+    "scene": "Assets/OpenRDW/Scenes/OpenRDW Scene.unity",
+    "results_dir": "Experiment Results",
+    "requirements_source": "RDW_Aware_Finetune_Plan.md",
+    "last_updated": "2026-03-24"
+  },
+  "features": [
+    {
+      "id": "BOOT-001",
+      "title": "Initialize git baseline for session handoff",
+      "category": "bootstrap",
+      "priority": "P0",
+      "status": "todo",
+      "owner_role": "bootstrap",
+      "depends_on": [],
+      "verification": {
+        "type": "git",
+        "evidence": "git status succeeds at project root and an initial bootstrap commit exists"
+      },
+      "notes": "Current project root is not a git repository."
+    },
+    {
+      "id": "ENV-001",
+      "title": "Restore Unity licensing for batchmode verification",
+      "category": "environment",
+      "priority": "P0",
+      "status": "blocked",
+      "owner_role": "bootstrap",
+      "depends_on": [],
+      "verification": {
+        "type": "editor smoke",
+        "evidence": "Unity batchmode exits without licensing IPC timeout and writes an import or quit log"
+      },
+      "notes": "Current smoke attempt exits with code 199 after Licensing Client IPC timeout."
+    },
+    {
+      "id": "DATA-001",
+      "title": "Implement dataset traversal for RDWdatas_2_5hz",
+      "category": "data",
+      "priority": "P0",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [],
+      "verification": {
+        "type": "data",
+        "evidence": "dry run enumerates participants, trials, and avatars without path errors"
+      },
+      "notes": "Source path referenced in RDW_Aware_Finetune_Plan.md."
+    },
+    {
+      "id": "DATA-002",
+      "title": "Assemble 6D RDW-aware per-frame feature vectors",
+      "category": "data",
+      "priority": "P0",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [
+        "DATA-001"
+      ],
+      "verification": {
+        "type": "data",
+        "evidence": "sample sequences contain vx, vy, g_r, g_c, g_t, reset_flag with documented shape and units"
+      },
+      "notes": "Feature definitions come from the plan and StatisticsLogger outputs."
+    },
+    {
+      "id": "DATA-003",
+      "title": "Add segmentation, normalization, and split generation",
+      "category": "data",
+      "priority": "P0",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [
+        "DATA-002"
+      ],
+      "verification": {
+        "type": "data",
+        "evidence": "serialized train/val/test tensors are written with stored normalization stats and split metadata"
+      },
+      "notes": "Use subject-level splits and reject windows with large sampling gaps."
+    },
+    {
+      "id": "MODEL-001",
+      "title": "Adapt SingularTrajectory input layers to 6D RDW vectors",
+      "category": "model",
+      "priority": "P1",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [
+        "DATA-003"
+      ],
+      "verification": {
+        "type": "training",
+        "evidence": "model builds, loads checkpoints with strict=False, and finishes a smoke forward pass"
+      },
+      "notes": "Optional auxiliary heads can be deferred to a follow-up feature if needed."
+    },
+    {
+      "id": "MODEL-002",
+      "title": "Adapt PECNet encoder path to flattened RDW-aware histories",
+      "category": "model",
+      "priority": "P1",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [
+        "DATA-003"
+      ],
+      "verification": {
+        "type": "training",
+        "evidence": "preprocessed inputs are standardized and a smoke batch runs end-to-end"
+      },
+      "notes": "Track any reset-weighted loss as a separate optional refinement."
+    },
+    {
+      "id": "MODEL-003",
+      "title": "Adapt AgentFormer projector and checkpoint loading for RDW features",
+      "category": "model",
+      "priority": "P1",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [
+        "DATA-003"
+      ],
+      "verification": {
+        "type": "training",
+        "evidence": "new input projector runs with strict=False checkpoint restore and a smoke train step"
+      },
+      "notes": "Freeze-first-block stabilization can be included in the same feature if low risk."
+    },
+    {
+      "id": "EVAL-001",
+      "title": "Implement ADE/FDE plus reset-focused evaluation slices",
+      "category": "evaluation",
+      "priority": "P1",
+      "status": "todo",
+      "owner_role": "implementer",
+      "depends_on": [
+        "DATA-003"
+      ],
+      "verification": {
+        "type": "experiment",
+        "evidence": "evaluation output includes overall ADE/FDE and reset-flag subset metrics"
+      },
+      "notes": "Gain-threshold slices can be added if data coverage is sufficient."
+    },
+    {
+      "id": "EXP-001",
+      "title": "Run baseline, naive fine-tune, and RDW-aware fine-tune for SingularTrajectory",
+      "category": "experiment",
+      "priority": "P2",
+      "status": "todo",
+      "owner_role": "verifier",
+      "depends_on": [
+        "MODEL-001",
+        "EVAL-001"
+      ],
+      "verification": {
+        "type": "experiment",
+        "evidence": "metrics logged for all three conditions on the agreed test split"
+      },
+      "notes": "Keep config and split identifiers with the outputs."
+    },
+    {
+      "id": "EXP-002",
+      "title": "Run baseline, naive fine-tune, and RDW-aware fine-tune for PECNet",
+      "category": "experiment",
+      "priority": "P2",
+      "status": "todo",
+      "owner_role": "verifier",
+      "depends_on": [
+        "MODEL-002",
+        "EVAL-001"
+      ],
+      "verification": {
+        "type": "experiment",
+        "evidence": "metrics logged for all three conditions on the agreed test split"
+      },
+      "notes": "Store normalization stats alongside each run."
+    },
+    {
+      "id": "EXP-003",
+      "title": "Run baseline, naive fine-tune, and RDW-aware fine-tune for AgentFormer",
+      "category": "experiment",
+      "priority": "P2",
+      "status": "todo",
+      "owner_role": "verifier",
+      "depends_on": [
+        "MODEL-003",
+        "EVAL-001"
+      ],
+      "verification": {
+        "type": "experiment",
+        "evidence": "metrics logged for all three conditions on the agreed test split"
+      },
+      "notes": "Record any frozen-block warm-up settings in the run config."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python-openrdw"
+version = "0.1.0"
+description = "Engine-independent Python port of the core OpenRDW simulation logic"
+requires-python = ">=3.10"
+
+[project.optional-dependencies]
+deep-learning = ["onnxruntime", "numpy"]
+
+[project.scripts]
+openrdw-demo = "openrdw.cli:main"
+openrdw-ui = "openrdw.ui:main"
+
+[tool.setuptools]
+packages = ["openrdw"]
